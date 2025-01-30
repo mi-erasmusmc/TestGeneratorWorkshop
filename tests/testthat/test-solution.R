@@ -4,6 +4,7 @@ library(omopgenerics)
 library(testthat)
 library(PatientProfiles)
 library(CirceR)
+library(TestGenerator)
 library(SqlRender)
 source("R/icu.R")
 
@@ -80,13 +81,13 @@ test_that("Characterise", {
   expect_equal(countVentilation, "3")
   
   # # Visualization
-  # icu_visit <- cdm[["icu"]] %>% dplyr::collect()
-  # covid <- cdm[["covid"]] %>% dplyr::collect()
-  # ventilation <- cdm[["ventilation"]] %>% dplyr::collect()
-  # 
-  # TestGenerator::graphCohort(subject_id = 8, list("covid" = covid,
-  #                                                 "ventilation" = ventilation,
-  #                                                 "icu_visit" = icu_visit))
+  icu_visit <- cdm[["icu"]] %>% dplyr::collect()
+  covid <- cdm[["covid"]] %>% dplyr::collect()
+  ventilation <- cdm[["ventilation"]] %>% dplyr::collect()
+
+  TestGenerator::graphCohort(subject_id = 2, list("covid" = covid,
+                                                  "ventilation" = ventilation,
+                                                  "icu_visit" = icu_visit))
 
 })
 

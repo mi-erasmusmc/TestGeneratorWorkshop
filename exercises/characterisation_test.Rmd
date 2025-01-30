@@ -15,7 +15,7 @@ knitr::opts_chunk$set(echo = TRUE)
 Before running the tests, ensure that you have installed the necessary packages. You can install them using the following command:
 
 ```
-install.packages(c("dplyr", "CDMConnector", "omopgenerics", "testthat", "PatientProfiles", "here"))
+install.packages(c("TestGenerator", "dplyr", "CDMConnector", "omopgenerics", "testthat", "PatientProfiles", "here"))
 ```
 
 ## Running the Tests with `testthat`
