@@ -1,0 +1,393 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={Sample ICU Study Testing},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{Sample ICU Study Testing}
+\author{}
+\date{\vspace{-2.5em}2025-01-30}
+
+\begin{document}
+\maketitle
+
+\subsection{Setting Up the Test
+Environment}\label{setting-up-the-test-environment}
+
+Before running the tests, ensure that you have installed the necessary
+packages. You can install them using the following command:
+
+\begin{verbatim}
+install.packages(c("dplyr", "CDMConnector", "omopgenerics", "testthat", "PatientProfiles", "here"))
+\end{verbatim}
+
+\subsection{\texorpdfstring{Running the Tests with
+\texttt{testthat}}{Running the Tests with testthat}}\label{running-the-tests-with-testthat}
+
+The following code executes three separate tests:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Checking cohort counts}
+\item
+  \textbf{Characterization}
+\item
+  \textbf{Running the study}
+\end{itemize}
+
+\subsection{Creating a Test Database Using
+Excel}\label{creating-a-test-database-using-excel}
+
+\begin{itemize}
+\item
+  This project includes a sample population dataset,
+  \texttt{icu\_sample\_population}, located in the
+  \texttt{tests/testthat} folder. It contains:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    5 patients with ICU visits
+  \item
+    7 patients with COVID-19
+  \item
+    5 patients with mechanical ventilation
+  \end{itemize}
+
+  Explore the dataset and modify the tables to create your own test
+  cases.
+\item
+  The \texttt{TestGenerator} package provides a blank CDM, allowing you
+  to input your own patient data from scratch.
+\item
+  You can also create a test database for one of your ongoing studies.
+\item
+  If needed, you can collaborate with a data scientist, or we can assist
+  in processing the patients and running the tests for you.
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{cdmVersion }\OtherTok{\textless{}{-}} \StringTok{"5.3"}
+
+\NormalTok{TestGenerator}\SpecialCharTok{::}\FunctionTok{generateTestTables}\NormalTok{(}
+  \AttributeTok{tableNames =} \FunctionTok{c}\NormalTok{(}\StringTok{"person"}\NormalTok{, }\StringTok{"drug\_exposure"}\NormalTok{, }\StringTok{"condition\_occurrence"}\NormalTok{),}
+  \AttributeTok{cdmVersion =}\NormalTok{ cdmVersion,}
+  \AttributeTok{outputFolder =}\NormalTok{ here}\SpecialCharTok{::}\FunctionTok{here}\NormalTok{(}\StringTok{"tests"}\NormalTok{, }\StringTok{"testthat"}\NormalTok{),}
+  \AttributeTok{filename =} \FunctionTok{paste0}\NormalTok{(}\StringTok{"test\_cdm\_"}\NormalTok{, cdmVersion)}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{Reading the Test Data}\label{reading-the-test-data}
+
+After generating the test patients, a data scientist can use the Excel
+file to create the test CDM.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{filePath }\OtherTok{\textless{}{-}}\NormalTok{ testthat}\SpecialCharTok{::}\FunctionTok{test\_path}\NormalTok{(}\StringTok{"icu\_sample\_population.xlsx"}\NormalTok{)}
+\NormalTok{TestGenerator}\SpecialCharTok{::}\FunctionTok{readPatients.xl}\NormalTok{(}
+  \AttributeTok{filePath =}\NormalTok{ filePath,}
+  \AttributeTok{testName =} \StringTok{"icu\_sample\_population"}\NormalTok{,}
+  \AttributeTok{cdmVersion =} \StringTok{"5.3"}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## v Unit Test Definition Created Successfully: 'icu_sample_population'
+\end{verbatim}
+
+\subsection{Creating the CDM Database in
+Memory}\label{creating-the-cdm-database-in-memory}
+
+Now, we can select a dataset to create our CDM reference.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{cdm }\OtherTok{\textless{}{-}}\NormalTok{ TestGenerator}\SpecialCharTok{::}\FunctionTok{patientsCDM}\NormalTok{(}\AttributeTok{testName =} \StringTok{"icu\_sample\_population"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Note: method with signature 'DBIConnection#Id' chosen for function 'dbExistsTable',
+##  target signature 'duckdb_connection#Id'.
+##  "duckdb_connection#ANY" would also be valid
+\end{verbatim}
+
+\begin{verbatim}
+## ! cdm name not specified and could not be inferred from the cdm source table
+\end{verbatim}
+
+\begin{verbatim}
+## v Patients pushed to blank CDM successfully
+\end{verbatim}
+
+\subsection{Exploring the Data as a Standard CDM
+Reference}\label{exploring-the-data-as-a-standard-cdm-reference}
+
+The CDM reference contains all tables following standard conventions.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{cdm}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+\end{verbatim}
+
+\begin{verbatim}
+## -- # OMOP CDM reference (duckdb) of An OMOP CDM database -----------------------
+\end{verbatim}
+
+\begin{verbatim}
+## * omop tables: person, observation_period, visit_occurrence, visit_detail,
+## condition_occurrence, drug_exposure, procedure_occurrence, device_exposure,
+## measurement, observation, death, note, note_nlp, specimen, fact_relationship,
+## location, care_site, provider, payer_plan_period, cost, drug_era, dose_era,
+## condition_era, metadata, cdm_source, concept, vocabulary, domain,
+## concept_class, concept_relationship, relationship, concept_synonym,
+## concept_ancestor, source_to_concept_map, drug_strength, cohort_definition,
+## attribute_definition
+\end{verbatim}
+
+\begin{verbatim}
+## * cohort tables: -
+\end{verbatim}
+
+\begin{verbatim}
+## * achilles tables: -
+\end{verbatim}
+
+\begin{verbatim}
+## * other tables: -
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{cdm}\SpecialCharTok{$}\NormalTok{person}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # Source:   table<main.person> [?? x 18]
+## # Database: DuckDB v1.1.3 [cbarboza@Windows 10 x64:R 4.4.1/C:\Users\cbarboza\AppData\Local\Temp\RtmpMnFyHA\file1f181449557f.duckdb]
+##   person_id gender_concept_id year_of_birth month_of_birth day_of_birth
+##       <int>             <int>         <int>          <int>        <int>
+## 1         1              8532          1980             NA           NA
+## 2         2              8507          1990             NA           NA
+## 3         3              8532          2000             NA           NA
+## 4         4              8507          1980             NA           NA
+## 5         5              8532          1990             NA           NA
+## 6         6              8507          2000             NA           NA
+## 7         7              8532          1980             NA           NA
+## 8         8              8507          1990             NA           NA
+## # i 13 more variables: birth_datetime <dttm>, race_concept_id <int>,
+## #   ethnicity_concept_id <int>, location_id <int>, provider_id <int>,
+## #   care_site_id <int>, person_source_value <chr>, gender_source_value <chr>,
+## #   gender_source_concept_id <int>, race_source_value <chr>,
+## #   race_source_concept_id <int>, ethnicity_source_value <chr>,
+## #   ethnicity_source_concept_id <int>
+\end{verbatim}
+
+\subsection{\texorpdfstring{Creating Cohorts and Running Tests in the
+\texttt{testthat}
+Environment}{Creating Cohorts and Running Tests in the testthat Environment}}\label{creating-cohorts-and-running-tests-in-the-testthat-environment}
+
+The following steps are performed:
+
+\begin{itemize}
+\tightlist
+\item
+  Checking cohort counts
+\item
+  Testing the characterization function
+\item
+  Running the study
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(dplyr)}
+\FunctionTok{library}\NormalTok{(CDMConnector)}
+\FunctionTok{library}\NormalTok{(omopgenerics)}
+\FunctionTok{library}\NormalTok{(testthat)}
+\FunctionTok{library}\NormalTok{(PatientProfiles)}
+\FunctionTok{library}\NormalTok{(here)}
+\FunctionTok{source}\NormalTok{(here}\SpecialCharTok{::}\FunctionTok{here}\NormalTok{(}\StringTok{"R/icu.R"}\NormalTok{))}
+
+\FunctionTok{test\_that}\NormalTok{(}\StringTok{"Check cohort counts for COVID, ICU visits, and ventilation"}\NormalTok{, \{}
+\NormalTok{  cdm }\OtherTok{\textless{}{-}}\NormalTok{ TestGenerator}\SpecialCharTok{::}\FunctionTok{patientsCDM}\NormalTok{(}\AttributeTok{testName =} \StringTok{"icu\_sample\_population"}\NormalTok{)}
+  
+  \CommentTok{\# Generate cohorts}
+\NormalTok{  cohorts }\OtherTok{\textless{}{-}}\NormalTok{ here}\SpecialCharTok{::}\FunctionTok{here}\NormalTok{(}\StringTok{"cohorts"}\NormalTok{, }\StringTok{"population"}\NormalTok{)}
+\NormalTok{  icu\_cohort\_sets }\OtherTok{\textless{}{-}}\NormalTok{ CDMConnector}\SpecialCharTok{::}\FunctionTok{readCohortSet}\NormalTok{(cohorts)}
+\NormalTok{  cdm }\OtherTok{\textless{}{-}}\NormalTok{ CDMConnector}\SpecialCharTok{::}\FunctionTok{generate\_cohort\_set}\NormalTok{(cdm, icu\_cohort\_sets, }\AttributeTok{name =} \StringTok{"icu\_population\_cohorts"}\NormalTok{)}
+\NormalTok{  cdm[[}\StringTok{"icu\_population\_cohorts"}\NormalTok{]] }\SpecialCharTok{\%\textgreater{}\%}\NormalTok{ omopgenerics}\SpecialCharTok{::}\FunctionTok{settings}\NormalTok{()}
+  
+  \CommentTok{\# Check counts}
+\NormalTok{  cohort\_counts }\OtherTok{\textless{}{-}}\NormalTok{ omopgenerics}\SpecialCharTok{::}\FunctionTok{cohortCount}\NormalTok{(cdm}\SpecialCharTok{$}\NormalTok{icu\_population\_cohorts)}
+  
+  \FunctionTok{expect\_equal}\NormalTok{(cohort\_counts[}\DecValTok{1}\NormalTok{, ] }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{pull}\NormalTok{(number\_records), }\DecValTok{5}\NormalTok{)}
+  \FunctionTok{expect\_equal}\NormalTok{(cohort\_counts[}\DecValTok{2}\NormalTok{, ] }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{pull}\NormalTok{(number\_records), }\DecValTok{7}\NormalTok{)}
+  \FunctionTok{expect\_equal}\NormalTok{(cohort\_counts[}\DecValTok{3}\NormalTok{, ] }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{pull}\NormalTok{(number\_records), }\DecValTok{5}\NormalTok{)}
+\NormalTok{\})}
+
+\FunctionTok{test\_that}\NormalTok{(}\StringTok{"Characterization"}\NormalTok{, \{}
+\NormalTok{  cdm }\OtherTok{\textless{}{-}}\NormalTok{ TestGenerator}\SpecialCharTok{::}\FunctionTok{patientsCDM}\NormalTok{(}\AttributeTok{testName =} \StringTok{"icu\_sample\_population"}\NormalTok{)}
+\NormalTok{  cohorts }\OtherTok{\textless{}{-}}\NormalTok{ here}\SpecialCharTok{::}\FunctionTok{here}\NormalTok{(}\StringTok{"cohorts"}\NormalTok{, }\StringTok{"population"}\NormalTok{)}
+  
+\NormalTok{  icu\_cohort }\OtherTok{\textless{}{-}}\NormalTok{ CDMConnector}\SpecialCharTok{::}\FunctionTok{readCohortSet}\NormalTok{(cohorts) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{    dplyr}\SpecialCharTok{::}\FunctionTok{filter}\NormalTok{(cohort\_name }\SpecialCharTok{==} \StringTok{"p2\_c1\_014\_icu\_visit\_dv\_v2"}\NormalTok{)}
+\NormalTok{  cdm }\OtherTok{\textless{}{-}}\NormalTok{ CDMConnector}\SpecialCharTok{::}\FunctionTok{generate\_cohort\_set}\NormalTok{(cdm, icu\_cohort, }\AttributeTok{name =} \StringTok{"icu"}\NormalTok{)}
+  
+\NormalTok{  covid\_cohort }\OtherTok{\textless{}{-}}\NormalTok{ CDMConnector}\SpecialCharTok{::}\FunctionTok{readCohortSet}\NormalTok{(cohorts) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{    dplyr}\SpecialCharTok{::}\FunctionTok{filter}\NormalTok{(cohort\_name }\SpecialCharTok{==} \StringTok{"p2\_c1\_014\_covid19\_v2"}\NormalTok{)}
+\NormalTok{  cdm }\OtherTok{\textless{}{-}}\NormalTok{ CDMConnector}\SpecialCharTok{::}\FunctionTok{generate\_cohort\_set}\NormalTok{(cdm, covid\_cohort, }\AttributeTok{name =} \StringTok{"covid"}\NormalTok{)}
+  
+\NormalTok{  ventilation\_cohort }\OtherTok{\textless{}{-}}\NormalTok{ CDMConnector}\SpecialCharTok{::}\FunctionTok{readCohortSet}\NormalTok{(cohorts) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{    dplyr}\SpecialCharTok{::}\FunctionTok{filter}\NormalTok{(cohort\_name }\SpecialCharTok{==} \StringTok{"p2\_c1\_014\_mechanical\_ventilation\_dv\_v2"}\NormalTok{)}
+\NormalTok{  cdm }\OtherTok{\textless{}{-}}\NormalTok{ CDMConnector}\SpecialCharTok{::}\FunctionTok{generate\_cohort\_set}\NormalTok{(cdm, ventilation\_cohort, }\AttributeTok{name =} \StringTok{"ventilation"}\NormalTok{)}
+  
+\NormalTok{  summaryCharacterization }\OtherTok{\textless{}{-}} \FunctionTok{characterizeICU}\NormalTok{(}
+    \AttributeTok{cdm =}\NormalTok{ cdm,}
+    \AttributeTok{icuCohort =} \StringTok{"icu"}\NormalTok{,}
+    \AttributeTok{covidCohort =} \StringTok{"covid"}\NormalTok{,}
+    \AttributeTok{ventilationCohort =} \StringTok{"ventilation"}
+\NormalTok{  )}
+  
+  \FunctionTok{expect\_s3\_class}\NormalTok{(summaryCharacterization, }\FunctionTok{c}\NormalTok{(}\StringTok{"summarised\_result"}\NormalTok{, }\StringTok{"omop\_result"}\NormalTok{))}
+  \FunctionTok{expect\_equal}\NormalTok{(}
+\NormalTok{    summaryCharacterization }\SpecialCharTok{\%\textgreater{}\%} 
+      \FunctionTok{filter}\NormalTok{(variable\_name }\SpecialCharTok{==} \StringTok{"covid\_m14\_to\_0"}\NormalTok{, estimate\_name }\SpecialCharTok{==} \StringTok{"count"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} 
+      \FunctionTok{pull}\NormalTok{(estimate\_value), }\StringTok{"4"}
+\NormalTok{  )}
+  \FunctionTok{expect\_equal}\NormalTok{(}
+\NormalTok{    summaryCharacterization }\SpecialCharTok{\%\textgreater{}\%} 
+      \FunctionTok{filter}\NormalTok{(variable\_name }\SpecialCharTok{==} \StringTok{"ventilation\_m7\_to\_0"}\NormalTok{, estimate\_name }\SpecialCharTok{==} \StringTok{"count"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} 
+      \FunctionTok{pull}\NormalTok{(estimate\_value), }\StringTok{"3"}
+\NormalTok{  )}
+\NormalTok{\})}
+
+\FunctionTok{test\_that}\NormalTok{(}\StringTok{"Run Study"}\NormalTok{, \{}
+\NormalTok{  cdm }\OtherTok{\textless{}{-}}\NormalTok{ TestGenerator}\SpecialCharTok{::}\FunctionTok{patientsCDM}\NormalTok{(}\AttributeTok{testName =} \StringTok{"icu\_sample\_population"}\NormalTok{)}
+\NormalTok{  outputDir }\OtherTok{\textless{}{-}} \FunctionTok{paste0}\NormalTok{(}\FunctionTok{tempdir}\NormalTok{(), }\StringTok{"/results"}\NormalTok{)}
+  \FunctionTok{dir.create}\NormalTok{(outputDir)}
+  
+  \FunctionTok{runStudy}\NormalTok{(cdm, }\AttributeTok{outputDir =}\NormalTok{ outputDir)}
+  
+\NormalTok{  files\_created }\OtherTok{\textless{}{-}} \FunctionTok{list.files}\NormalTok{(outputDir)}
+  \FunctionTok{expect\_true}\NormalTok{(}\StringTok{"icu\_summary.csv"} \SpecialCharTok{\%in\%}\NormalTok{ files\_created)}
+  
+  \FunctionTok{unlink}\NormalTok{(outputDir, }\AttributeTok{recursive =} \ConstantTok{TRUE}\NormalTok{)}
+\NormalTok{\})}
+\end{Highlighting}
+\end{Shaded}
+
+
+\end{document}

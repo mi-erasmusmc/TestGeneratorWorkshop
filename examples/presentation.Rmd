@@ -1,0 +1,690 @@
+---
+title: "TestGenerator Workshop"
+author: "Erasmus MC"
+date: "2025-01-30"
+output:
+  slidy_presentation: default
+  ioslides_presentation: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## What is TestGenerator?
+
+TestGenerator is an R package designed to create an OMOP-CDM test database with a sample of patients.
+
+- Follows OMOP-CDM conventions
+- Uses a complete vocabulary
+- Ensures confidence that our code executes correctly
+
+## Why it is a good idea to test study code?
+
+- Verify that we are using the correct parameters in analytical packages
+- Test custom code
+- Ensure our study code runs successfully from start to finish
+
+## How does it work?
+### TestGenerator::readPatients.xl()
+
+1. We write an Excel file, where: 
+  - Sheets represents tables in the OMOP-CDM 
+  - Rows represent records of patients
+  
+A familiar interface for non-programmers
+
+## TestGenerator::readPatients.csv()
+
+- Useful to load a test data such as MIMIC IV, NCR, etc. 
+- We can replace vocabulary tables with a custom vocabulary
+
+```{r}
+
+list.files(testthat::test_path("ncr_test_cdm_10"))
+
+```
+
+## TestGenerator::readPatients.csv()
+
+- Creates a test database with a sample of patients in json format. 
+  - We can reuse this data to test our study code
+  - Save multiple datasets if required for specific cases
+  
+````
+{
+    "cdm.person": [
+        {
+            "person_id":1,
+            "gender_concept_id":8532,
+            "year_of_birth":1999,
+            "race_concept_id":0,
+            "ethnicity_concept_id":0
+        },
+        {
+            "person_id":2,
+            "gender_concept_id":8507,
+            "year_of_birth":1995,
+            "race_concept_id":0,
+            "ethnicity_concept_id":0
+        }
+    ],
+    "cdm.observation_period" : [
+        {
+          "observation_period_id": 1,
+          "person_id":1,
+          "observation_period_start_date":"2000-01-01",
+          "observation_period_end_date":"2001-01-01",
+          "period_type_concept_id": 0
+        },
+        {
+          "observation_period_id": 2,
+          "person_id":2,
+          "observation_period_start_date":"2000-01-01",
+          "observation_period_end_date":"2001-01-01",
+          "period_type_concept_id": 0
+        }
+    ],
+    "cdm.drug_exposure": [
+        {
+          "drug_exposure_id": 1,
+          "person_id":1,
+          "drug_concept_id":40852223,
+          "quantity": 30,
+          "days_supply": 30,
+          "drug_exposure_start_date":"2000-01-01",
+          "drug_exposure_end_date":"2000-01-31",
+          "drug_type_concept_id":0
+        },
+        {
+          "drug_exposure_id": 2,
+          "person_id":2,
+          "drug_concept_id":40852223,
+          "quantity": 30,
+          "days_supply": 30,
+          "drug_exposure_start_date":"2000-01-01",
+          "drug_exposure_end_date":"2000-01-31",
+          "drug_type_concept_id":0
+        }
+    ]
+````
+
+## TestGenerator::readPatients()
+
+- Save multiple datasets if required for specific cases
+
+- A directory with XLSX files
+
+```{r, echo=TRUE}
+list.files(testthat::test_path(), pattern = ".xlsx")
+```
+
+## TestGenerator::readPatients()
+
+- Save datasets in JSON format.
+  - This allows to save several datasets for testing
+  
+```{r, echo=FALSE}
+mimicIVsubsetLocation <- here::here("tests", "testthat", "mimicIVsubset")
+testCasesLocation <- here::here("tests", "testthat", "testCases")
+icu_sample_population_location <- here::here("tests", "testthat", "icu_sample_population.xlsx")
+
+```
+  
+```{r, echo=TRUE}
+# This is an example of a test that uses the MIMIC IV subset dataset
+TestGenerator::readPatients.csv(filePath = testthat::test_path("mimicIVsubset"),
+                                testName = "mimicIVsubset")
+```
+
+## TestGenerator::readPatients()
+
+```{r, echo=TRUE}
+TestGenerator::readPatients.xl(filePath = icu_sample_population_location,
+                               testName = "icu_sample_population")
+```
+
+## TestGenerator::readPatients()
+
+```{r, echo=TRUE}
+list.files(testCasesLocation)
+```
+
+
+## TestGenerator::readPatients()
+
+```{r, echo=TRUE}
+list.files(testCasesLocation)
+```
+
+## TestGenerator::patientsCDM()
+
+```{r, echo=TRUE}
+cdm <- TestGenerator::patientsCDM(pathJson = testCasesLocation,
+                                  testName = "icu_sample_population")
+```
+
+## TestGenerator::patientsCDM()
+
+```{r, echo=TRUE}
+cdm
+```
+
+
+## TestGenerator::patientsCDM()
+
+```{r, echo=TRUE}
+cdm$person
+```
+
+## TestGenerator::patientsCDM()
+
+```{r, echo=TRUE}
+cdm$drug_exposure
+```
+## Test Scenarios
+
+- Cohorts/Phenotyping 
+- Study objectives
+- Study execution (runStudy)
+
+## Testing study P2-C1-014- ICU Prescriptions
+
+- Cohorts
+
+````
+test_that("condition and visit cohorts counts", {
+  # Read patients from JSON (run only once)
+  # filePath <- testthat::test_path("icu_sample_population.xlsx")
+  # outputPath <- file.path(tempdir(), "testCases")
+  # dir.create(outputPath)
+  # TestGenerator::readPatients.xl(filePath = filePath,
+  #                                testName = "icu_sample_population",
+  #                                outputPath = outputPath,
+  #                                cdmVersion = "5.3")
+
+  cdm <- TestGenerator::patientsCDM(testName = "icu_sample_population")
+  # Cohorts
+  population <- system.file("cohorts",
+                            "population",
+                            package = "P2C1014PrescriptionsICU")
+  cohort_set <- CDMConnector::readCohortSet(population)
+
+  cdm <- CDMConnector::generate_cohort_set(cdm,
+                                           cohort_set,
+                                           name = "icu_cohorts")
+
+  # Counts
+
+  cdm$icu_cohorts %>% collect() %>% filter(cohort_definition_id == 5)
+
+  cohort_count <- omopgenerics::cohortCount(cdm$icu_cohorts) %>%
+    dplyr::left_join(cohort_set, by = "cohort_definition_id") %>%
+    dplyr::select(cohort_definition_id,
+                  cohort_name,
+                  number_records,
+                  number_subjects)
+
+
+  hosp_count <- cohort_count %>% filter(cohort_name == "p2_c1_014_hospitalization_dv_v2") %>% pull(number_subjects)
+  hosp_icu_visit_count <- cohort_count %>% filter(cohort_name == "p2_c1_014_hospitalization_icu_visit_dv_v2") %>% pull(number_subjects)
+  hosp_no_icu_count <- cohort_count %>% filter(cohort_name == "p2_c1_014_hospitalization_no_icu_visit_dv_v4") %>% pull(number_subjects)
+  icu_only_count <- cohort_count %>% filter(cohort_name == "p2_c1_014_icu_visit_dv_v2") %>% pull(number_subjects)
+  covid_count <- cohort_count %>% filter(cohort_name == "p2_c1_014_covid19_v2") %>% pull(number_subjects)
+  mech_count <- cohort_count %>% filter(cohort_name == "p2_c1_014_mechanical_ventilation_dv_v2") %>% pull(number_subjects)
+
+  # Test
+  expect_equal(hosp_count, 8)
+  expect_equal(hosp_icu_visit_count, 7)
+  expect_equal(hosp_no_icu_count, 1)
+  expect_equal(icu_only_count, 7)
+  expect_equal(covid_count, 5)
+  expect_equal(mech_count, 5)
+  # unlink(outputPath, recursive = TRUE)
+
+})
+
+````
+
+## Testing study P3-C1-015 - Incidence of myoclonus in heart failure
+
+- Study objectives
+
+- Treatment inclusion
+
+````
+test_that("runStudy results, treatment inclusion", {
+
+  testPath <- getwd()
+  # Read patients from JSON
+  cdm <- TestGenerator::patientsCDM(
+    pathJson = testPath,
+    testName = "testTreatmentInclusion"
+  )
+
+  dbName <- "TestDataTreatmentInclusion"
+
+  resultsDir <- file.path(testPath, glue::glue("Results_{dbName}"))
+
+  runStudy(
+    conn = attr(cdm, "dbcon"),
+    cdmDatabaseSchema = "main",
+    resultsDatabaseSchema = "main",
+    dbName = dbName,
+    tablePrefix = "pre_",
+    minCellCount = 0
+  )
+
+  # define result file paths
+  resultPathAceInhibitors <- file.path(resultsDir, "incidence_hf_treatment_ace_inhibitors.csv")
+  resultPathArbs <- file.path(resultsDir, "incidence_hf_treatment_arbs.csv")
+  resultPathSacubitrilFirst <- file.path(resultsDir, "incidence_hf_treatment_sacubitril_first.csv")
+  resultPathSacubitrilLater <- file.path(resultsDir, "incidence_hf_treatment_sacubitril_later.csv")
+
+  # load and format results
+  resultAceInhibitors <- omopgenerics::importSummarisedResult(resultPathAceInhibitors)
+  resultAceInhibitors <- formatIncidence(resultAceInhibitors)
+  resultArbs <- omopgenerics::importSummarisedResult(resultPathArbs)
+  resultArbs <- formatIncidence(resultArbs)
+  resultSacubitrilFirst <- omopgenerics::importSummarisedResult(resultPathSacubitrilFirst)
+  resultSacubitrilFirst <- formatIncidence(resultSacubitrilFirst)
+  resultSacubitrilLater <- omopgenerics::importSummarisedResult(resultPathSacubitrilLater)
+  resultSacubitrilLater <- formatIncidence(resultSacubitrilLater)
+
+
+  # get treatment for female subjects
+  resultAceInhibitorsFemale <- minimiseResults(resultAceInhibitors,
+    gender = "Female",
+    timeAtRisk = "0 to 30"
+  )
+
+  resultArbsFemale <- minimiseResults(resultArbs,
+    gender = "Female",
+    timeAtRisk = "0 to 30"
+  )
+
+  resultSacubitrilFirstFemale <- minimiseResults(resultSacubitrilFirst,
+    gender = "Female",
+    timeAtRisk = "0 to 30"
+  )
+
+  resultSacubitrilFirstLaterFemale <- minimiseResults(resultSacubitrilLater,
+    gender = "Female",
+    timeAtRisk = "0 to 30"
+  )
+
+  expect_equal(nrow(resultAceInhibitorsFemale)[[1]], 1)
+  expect_equal(resultAceInhibitorsFemale$n_persons[1], 1)
+  expect_equal(resultAceInhibitorsFemale$n_events[1], 1)
+  expect_equal(resultAceInhibitorsFemale$incidence_start_date[1], "2020-07-02")
+
+  expect_equal(nrow(resultArbsFemale)[[1]], 1)
+  expect_equal(resultArbsFemale$n_persons[1], 1)
+  expect_equal(resultArbsFemale$n_events[1], 1)
+  expect_equal(resultArbsFemale$incidence_start_date[1], "2020-07-03")
+
+  expect_equal(nrow(resultSacubitrilFirstFemale)[[1]], 1)
+  expect_equal(resultSacubitrilFirstFemale$n_persons[1], 1)
+  expect_equal(resultSacubitrilFirstFemale$n_events[1], 1)
+  expect_equal(resultSacubitrilFirstFemale$incidence_start_date[1], "2020-07-01")
+
+  expect_equal(nrow(resultSacubitrilFirstLaterFemale)[1], 0)
+
+
+  # get treatment for male subjects
+  resultAceInhibitorsMale <- minimiseResults(resultAceInhibitors,
+    gender = "Male",
+    timeAtRisk = "0 to 30"
+  )
+
+  resultArbsMale <- minimiseResults(resultArbs,
+    gender = "Male",
+    timeAtRisk = "0 to 30"
+  )
+
+  resultSacubitrilFirstMale <- minimiseResults(resultSacubitrilFirst,
+    gender = "Male",
+    timeAtRisk = "0 to 30"
+  )
+
+  resultSacubitrilFirstLaterMale <- minimiseResults(resultSacubitrilLater,
+    gender = "Male",
+    timeAtRisk = "0 to 30"
+  )
+
+
+  expect_equal(nrow(resultAceInhibitorsMale)[[1]], 1)
+  expect_equal(resultAceInhibitorsMale$n_persons[1], 1)
+  expect_equal(resultAceInhibitorsMale$n_events[1], 1)
+  expect_equal(resultAceInhibitorsMale$incidence_start_date[1], "2020-07-04")
+
+  expect_equal(nrow(resultArbsMale)[[1]], 1)
+  expect_equal(resultArbsMale$n_persons[1], 1)
+  expect_equal(resultArbsMale$n_events[1], 1)
+  expect_equal(resultArbsMale$incidence_start_date[1], "2020-07-05")
+
+  expect_equal(nrow(resultSacubitrilFirstLaterMale)[[1]], 1)
+  expect_equal(resultSacubitrilFirstLaterMale$n_persons[1], 2)
+  expect_equal(resultSacubitrilFirstLaterMale$n_events[1], 2)
+  expect_equal(resultSacubitrilFirstLaterMale$incidence_start_date[1], "2020-07-11")
+
+  expect_equal(nrow(resultSacubitrilFirstMale)[1], 0)
+
+  # general population
+  resultPathGeneral <- file.path(resultsDir, "incidence.csv")
+
+  resultGeneral <- omopgenerics::importSummarisedResult(resultPathGeneral)
+  resultGeneral <- formatIncidence(resultGeneral)
+
+  resultGeneral <- minimiseResults(resultGeneral,
+    gender = "Both",
+    timeAtRisk = "0 to Inf"
+  )
+
+  # heart failre population
+  resultPathHf <- file.path(resultsDir, "incidence_hf.csv")
+
+  resultHf <- omopgenerics::importSummarisedResult(resultPathHf)
+  resultHf <- formatIncidence(resultHf)
+
+  resultHf <- minimiseResults(resultHf,
+    gender = "Both",
+    timeAtRisk = "0 to 30"
+  )
+
+  expect_equal(nrow(resultGeneral)[[1]], 1)
+  expect_equal(resultGeneral$n_persons[1], 5)
+  expect_equal(resultGeneral$n_events[1], 5)
+  expect_equal(resultGeneral$incidence_start_date[1], "2015-01-01")
+
+  expect_equal(nrow(resultHf)[[1]], 1)
+  expect_equal(resultHf$n_persons[1], 5)
+  expect_equal(resultHf$n_events[1], 5)
+  expect_equal(resultHf$incidence_start_date[1], "2020-07-01")
+
+  unlink(resultsDir, recursive = TRUE)
+})
+
+````
+
+## Test scenario
+Strata
+
+````
+test_that("runStudy results, strata", {
+
+  testPath <- getwd()
+  # Read patients from JSON
+  cdm <- TestGenerator::patientsCDM(
+    pathJson = testPath,
+    testName = "testStrata"
+  )
+
+  dbName <- "testStrata"
+
+  resultsDir <- file.path(testPath, glue::glue("Results_{dbName}"))
+
+  runStudy(
+    conn = attr(cdm, "dbcon"),
+    cdmDatabaseSchema = "main",
+    resultsDatabaseSchema = "main",
+    dbName = dbName,
+    tablePrefix = "pre_",
+    minCellCount = 0
+  )
+
+  # define result file paths
+  resultPathAceInhibitors <- file.path(resultsDir, "incidence_hf_treatment_ace_inhibitors.csv")
+  resultPathArbs <- file.path(resultsDir, "incidence_hf_treatment_arbs.csv")
+  resultPathSacubitrilFirst <- file.path(resultsDir, "incidence_hf_treatment_sacubitril_first.csv")
+  resultPathSacubitrilLater <- file.path(resultsDir, "incidence_hf_treatment_sacubitril_later.csv")
+
+  # load and format results
+  resultAceInhibitors <- omopgenerics::importSummarisedResult(resultPathAceInhibitors)
+  resultAceInhibitors <- formatIncidence(resultAceInhibitors)
+  resultArbs <- omopgenerics::importSummarisedResult(resultPathArbs)
+  resultArbs <- formatIncidence(resultArbs)
+  resultSacubitrilFirst <- omopgenerics::importSummarisedResult(resultPathSacubitrilFirst)
+  resultSacubitrilFirst <- formatIncidence(resultSacubitrilFirst)
+  resultSacubitrilLater <- omopgenerics::importSummarisedResult(resultPathSacubitrilLater)
+  resultSacubitrilLater <- formatIncidence(resultSacubitrilLater)
+
+  # get results for female subjects - test time at risk
+  resultAceInhibitorsFemale <- minimiseResults(resultAceInhibitors,
+    gender = "Female",
+    timeAtRisk = "0 to 30",
+    ageGroup = "50 to 79"
+  )
+
+  expect_equal(nrow(resultAceInhibitorsFemale)[[1]], 1)
+  expect_equal(resultAceInhibitorsFemale$n_persons[1], 1)
+  expect_equal(resultAceInhibitorsFemale$n_events[1], 0)
+  expect_equal(resultAceInhibitorsFemale$incidence_start_date[1], "2020-07-02")
+
+  resultAceInhibitorsFemale <- minimiseResults(resultAceInhibitors,
+    gender = "Female",
+    timeAtRisk = "31 to 90",
+    ageGroup = "50 to 79"
+  )
+
+  expect_equal(nrow(resultAceInhibitorsFemale)[[1]], 1)
+  expect_equal(resultAceInhibitorsFemale$n_persons[1], 1)
+  expect_equal(resultAceInhibitorsFemale$n_events[1], 1)
+  expect_equal(resultAceInhibitorsFemale$incidence_start_date[1], "2020-08-02")
+
+
+  resultArbsFemale <- minimiseResults(resultArbs,
+    gender = "Female",
+    timeAtRisk = "181 to 365",
+    ageGroup = "50 to 79"
+  )
+
+  expect_equal(nrow(resultArbsFemale)[[1]], 1)
+  expect_equal(resultArbsFemale$n_persons[1], 1)
+  expect_equal(resultArbsFemale$n_events[1], 0)
+  expect_equal(resultArbsFemale$incidence_start_date[1], "2020-12-31")
+
+
+  resultSacubitrilFirstFemale <- minimiseResults(resultSacubitrilFirst,
+    gender = "Female",
+    timeAtRisk = "0 to 30",
+    ageGroup = "50 to 79"
+  )
+
+  expect_equal(nrow(resultSacubitrilFirstFemale)[[1]], 1)
+  expect_equal(resultSacubitrilFirstFemale$n_persons[1], 1)
+  expect_equal(resultSacubitrilFirstFemale$n_events[1], 1)
+  expect_equal(resultSacubitrilFirstFemale$incidence_start_date[1], "2020-07-01")
+
+
+  resultSacubitrilFirstLaterFemale <- minimiseResults(resultSacubitrilLater,
+    gender = "Female",
+    timeAtRisk = "0 to 30",
+    ageGroup = "50 to 79"
+  )
+
+  expect_equal(nrow(resultSacubitrilFirstLaterFemale)[[1]], 0)
+
+  # get results for male subjects - test age groups
+  resultAceInhibitorsMale <- minimiseResults(resultAceInhibitors,
+    gender = "Male",
+    timeAtRisk = "0 to 30",
+    ageGroup = "18 to 49"
+  )
+
+  expect_equal(nrow(resultAceInhibitorsMale)[[1]], 1)
+  expect_equal(resultAceInhibitorsMale$n_persons[1], 1)
+  expect_equal(resultAceInhibitorsMale$n_events[1], 0)
+  expect_equal(resultAceInhibitorsMale$incidence_start_date[1], "2020-07-14")
+
+  resultArbsMale <- minimiseResults(resultArbs,
+    gender = "Male",
+    timeAtRisk = "0 to 30",
+    ageGroup = "18 to 49"
+  )
+
+  expect_equal(nrow(resultArbsMale)[[1]], 1)
+  expect_equal(resultArbsMale$n_persons[1], 1)
+  expect_equal(resultArbsMale$n_events[1], 0)
+  expect_equal(resultArbsMale$incidence_start_date[1], "2020-07-15")
+
+  # underage subject must not be included
+  resultSacubitrilFirstMale <- minimiseResults(resultSacubitrilFirst,
+    gender = "Male",
+    timeAtRisk = "0 to 30",
+    ageGroup = "18 to 130"
+  )
+
+  expect_equal(nrow(resultSacubitrilFirstMale)[[1]], 1)
+  expect_equal(resultSacubitrilFirstMale$n_persons[1], 1)
+  expect_equal(resultSacubitrilFirstMale$n_events[1], 0)
+  expect_equal(resultSacubitrilFirstMale$incidence_start_date[1], "2020-07-13")
+
+  resultSacubitrilFirstMale <- minimiseResults(resultSacubitrilFirst,
+    gender = "Male",
+    timeAtRisk = "0 to 30",
+    ageGroup = "80 to 130"
+  )
+
+  expect_equal(nrow(resultSacubitrilFirstMale)[[1]], 1)
+  expect_equal(resultSacubitrilFirstMale$n_persons[1], 1)
+  expect_equal(resultSacubitrilFirstMale$n_events[1], 0)
+  expect_equal(resultSacubitrilFirstMale$incidence_start_date[1], "2020-07-13")
+
+
+  resultSacubitrilFirstLaterMale <- minimiseResults(resultSacubitrilLater,
+    gender = "Male",
+    timeAtRisk = "0 to 30",
+    ageGroup = "50 to 79"
+  )
+
+  expect_equal(nrow(resultSacubitrilFirstLaterMale)[[1]], 1)
+  expect_equal(resultSacubitrilFirstLaterMale$n_persons[1], 2)
+  expect_equal(resultSacubitrilFirstLaterMale$n_events[1], 2)
+  expect_equal(resultSacubitrilFirstLaterMale$incidence_start_date[1], "2020-07-11")
+
+  # test age groups general population
+  resultPathGeneral <- file.path(resultsDir, "incidence.csv")
+
+  resultGeneral <- omopgenerics::importSummarisedResult(resultPathGeneral)
+  resultGeneral <- formatIncidence(resultGeneral)
+
+  resultGeneralBoth <- minimiseResults(resultGeneral,
+    gender = "Both",
+    timeAtRisk = "0 to Inf",
+    ageGroup = "18 to 49"
+  )
+
+  expect_equal(nrow(resultGeneralBoth)[[1]], 1)
+  expect_equal(resultGeneralBoth$n_persons[1], 7)
+
+  resultGeneralBoth <- minimiseResults(resultGeneral,
+    gender = "Both",
+    timeAtRisk = "0 to Inf",
+    ageGroup = "50 to 79"
+  )
+
+  expect_equal(nrow(resultGeneralBoth)[[1]], 1)
+  expect_equal(resultGeneralBoth$n_persons[1], 5)
+
+  resultGeneralBoth <- minimiseResults(resultGeneral,
+    gender = "Both",
+    timeAtRisk = "0 to Inf",
+    ageGroup = "80 to 130"
+  )
+
+  expect_equal(nrow(resultGeneralBoth)[[1]], 1)
+  expect_equal(resultGeneralBoth$n_persons[1], 1)
+
+  # test heart failure population
+  resultPathHf <- file.path(resultsDir, "incidence_hf.csv")
+
+  resultHf <- omopgenerics::importSummarisedResult(resultPathHf)
+  resultHf <- formatIncidence(resultHf)
+
+  resultHfBoth <- minimiseResults(resultHf,
+    gender = "Both",
+    timeAtRisk = "181 to 365",
+    ageGroup = "18 to 130"
+  )
+
+  expect_equal(nrow(resultHfBoth)[[1]], 1)
+  expect_equal(resultHfBoth$n_persons[1], 4) # includes female subject that develops myoclonus more than a year later
+  expect_equal(resultHfBoth$n_events[1], 0)
+
+  resultHfBoth <- minimiseResults(resultHf,
+    gender = "Both",
+    timeAtRisk = "181 to 365",
+    ageGroup = "80 to 130"
+  )
+
+  expect_equal(nrow(resultHfBoth)[[1]], 1)
+  expect_equal(resultHfBoth$n_persons[1], 1)
+  expect_equal(resultHfBoth$n_events[1], 0)
+
+  unlink(resultsDir, recursive = TRUE)
+})
+
+````
+## Test scenario:
+### Making sure the study code runs successfully
+
+````
+test_that("run study", {
+  
+  testPath <- getwd()
+  # Read patients from JSON
+  cdm <- TestGenerator::patientsCDM(
+    pathJson = testPath,
+    testName = "testData"
+  )
+  dbName <- "TestData"
+
+  resultsDir <- file.path(testPath, glue::glue("Results_{dbName}"))
+  runStudy(
+    conn = attr(cdm, "dbcon"),
+    cdmDatabaseSchema = "main",
+    resultsDatabaseSchema = "main",
+    dbName = dbName,
+    tablePrefix = "pre_",
+    minCellCount = 0,
+    useMultipleTimeAtRiskWindows = FALSE
+  )
+
+  expect_true(dir.exists(resultsDir))
+  result <- list.files(resultsDir)
+  expect_length(result, 15)
+
+  expect_equal(sort(result), sort(c(
+     "dbinfo.csv", "incidence.csv", "incidence_hf.csv", "incidence_hf_treatment_ace_inhibitors.csv",
+    "incidence_hf_treatment_arbs.csv", "incidence_hf_treatment_sacubitril_first.csv", "incidence_hf_treatment_sacubitril_later.csv",
+    glue::glue("log_{dbName}.txt"), "obj1GeneralAttrition.csv", "obj1HFAttrition.csv", "obj2_treatment_ace_inhibitors_attrition.csv", 
+    "obj2_treatment_arbs_attrition.csv", "obj2_treatment_sacubitril_first_attrition.csv", "obj2_treatment_sacubitril_later_attrition.csv", "sysInfo.txt"
+  )))
+
+  unlink(resultsDir, recursive = TRUE)
+})
+
+````
+## Unit Testing Framework
+
+Makes easier to review the code and ensure that it runs correctly
+
+1. Cohorts/Phenotyping 
+2. Study objectives
+3. Study execution (runStudy)
+
+## Exercise: ICU Prescriptions
+
+1. Create a test database with a sample of patients
+2. Sample dataset P2-C1-014 ICU Prescriptions
+
+## Objective
+
+Characterize hospitalized patients (ICU admission (yes/no)) 
+
+- Hospitalization
+- ICU admission
+- Who initiated treatment with drug of interest 
+- Presence of COVID-19 infection 
+- Mechanical ventilation (yes/no)
