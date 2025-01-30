@@ -1,0 +1,173 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# TestGeneratorWorkshop
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+## Setting Up the Test Environment
+
+Before running the tests, ensure that you have installed the necessary packages. You can install them using the following command:
+
+```
+install.packages(c("dplyr", "CDMConnector", "omopgenerics", "testthat", "PatientProfiles", "here"))
+```
+
+## Running the Tests with `testthat`
+
+The following code executes three separate tests:
+
+- **Checking cohort counts**
+- **Characterization**
+- **Running the study**
+
+## Creating a Test Database Using Excel
+
+- This project includes a sample population dataset, `icu_sample_population`, located in the `tests/testthat` folder. It contains:
+  - 5 patients with ICU visits
+  - 7 patients with COVID-19
+  - 5 patients with mechanical ventilation
+
+  Explore the dataset and modify the tables to create your own test cases.
+
+- The `TestGenerator` package provides a blank CDM, allowing you to input your own patient data from scratch.
+
+- You can also create a test database for one of your ongoing studies.
+
+- If needed, you can collaborate with a data scientist, or we can assist in processing the patients and running the tests for you.
+
+```{r}
+cdmVersion <- "5.3"
+
+TestGenerator::generateTestTables(
+  tableNames = c("person", "drug_exposure", "condition_occurrence"),
+  cdmVersion = cdmVersion,
+  outputFolder = here::here("tests", "testthat"),
+  filename = paste0("test_cdm_", cdmVersion)
+)
+```
+
+## Reading the Test Data
+
+After generating the test patients, a data scientist can use the Excel file to create the test CDM.
+
+```{r test_data}
+filePath <- testthat::test_path("icu_sample_population.xlsx")
+TestGenerator::readPatients.xl(
+  filePath = filePath,
+  testName = "icu_sample_population",
+  cdmVersion = "5.3"
+)
+```
+
+## Creating the CDM Database in Memory
+
+Now, we can select a dataset to create our CDM reference.
+
+```{r}
+cdm <- TestGenerator::patientsCDM(testName = "icu_sample_population")
+```
+
+## Exploring the Data as a Standard CDM Reference
+
+The CDM reference contains all tables following standard conventions.
+
+```{r}
+cdm
+
+cdm$person
+```
+
+## Creating Cohorts and Running Tests in the `testthat` Environment
+
+The following steps are performed:
+
+- Checking cohort counts
+- Testing the characterization function
+- Running the study
+
+```{r, eval=FALSE}
+library(dplyr)
+library(CDMConnector)
+library(omopgenerics)
+library(testthat)
+library(PatientProfiles)
+library(here)
+source(here::here("R/icu.R"))
+
+test_that("Check cohort counts for COVID, ICU visits, and ventilation", {
+  cdm <- TestGenerator::patientsCDM(testName = "icu_sample_population")
+  
+  # Generate cohorts
+  cohorts <- here::here("cohorts", "population")
+  icu_cohort_sets <- CDMConnector::readCohortSet(cohorts)
+  cdm <- CDMConnector::generate_cohort_set(cdm, icu_cohort_sets, name = "icu_population_cohorts")
+  cdm[["icu_population_cohorts"]] %>% omopgenerics::settings()
+  
+  # Check counts
+  cohort_counts <- omopgenerics::cohortCount(cdm$icu_population_cohorts)
+  
+  expect_equal(cohort_counts[1, ] %>% pull(number_records), 5)
+  expect_equal(cohort_counts[2, ] %>% pull(number_records), 7)
+  expect_equal(cohort_counts[3, ] %>% pull(number_records), 5)
+})
+
+test_that("Characterization", {
+  cdm <- TestGenerator::patientsCDM(testName = "icu_sample_population")
+  cohorts <- here::here("cohorts", "population")
+  
+  icu_cohort <- CDMConnector::readCohortSet(cohorts) %>%
+    dplyr::filter(cohort_name == "p2_c1_014_icu_visit_dv_v2")
+  cdm <- CDMConnector::generate_cohort_set(cdm, icu_cohort, name = "icu")
+  
+  covid_cohort <- CDMConnector::readCohortSet(cohorts) %>%
+    dplyr::filter(cohort_name == "p2_c1_014_covid19_v2")
+  cdm <- CDMConnector::generate_cohort_set(cdm, covid_cohort, name = "covid")
+  
+  ventilation_cohort <- CDMConnector::readCohortSet(cohorts) %>%
+    dplyr::filter(cohort_name == "p2_c1_014_mechanical_ventilation_dv_v2")
+  cdm <- CDMConnector::generate_cohort_set(cdm, ventilation_cohort, name = "ventilation")
+  
+  summaryCharacterization <- characterizeICU(
+    cdm = cdm,
+    icuCohort = "icu",
+    covidCohort = "covid",
+    ventilationCohort = "ventilation"
+  )
+  
+  expect_s3_class(summaryCharacterization, c("summarised_result", "omop_result"))
+  expect_equal(
+    summaryCharacterization %>% 
+      filter(variable_name == "covid_m14_to_0", estimate_name == "count") %>% 
+      pull(estimate_value), "4"
+  )
+  expect_equal(
+    summaryCharacterization %>% 
+      filter(variable_name == "ventilation_m7_to_0", estimate_name == "count") %>% 
+      pull(estimate_value), "3"
+  )
+})
+
+test_that("Run Study", {
+  cdm <- TestGenerator::patientsCDM(testName = "icu_sample_population")
+  outputDir <- paste0(tempdir(), "/results")
+  dir.create(outputDir)
+  
+  runStudy(cdm, outputDir = outputDir)
+  
+  files_created <- list.files(outputDir)
+  expect_true("icu_summary.csv" %in% files_created)
+  
+  unlink(outputDir, recursive = TRUE)
+})
