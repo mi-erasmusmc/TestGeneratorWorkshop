@@ -3,6 +3,8 @@ library(CDMConnector)
 library(omopgenerics)
 library(testthat)
 library(PatientProfiles)
+library(CirceR)
+library(SqlRender)
 source("R/icu.R")
 
 test_that("Check cohort counts for covid, icu visits and ventilation", {
